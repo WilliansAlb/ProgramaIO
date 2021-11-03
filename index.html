@@ -6,6 +6,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Modelo de redes</title>
+	<link rel="shortcut icon" href="red.png" type="image/x-icon">
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
 
@@ -279,8 +280,20 @@
 					for (let j = 0; j < precs.length; j++) {
 						DOTstring1 += precs[j] + " -> " + temp + ";";
 					}
+					var posible = false;
+					for (let e = 0; e < filas.length; e++) {
+						const element = filas[e].querySelectorAll("td")[8].textContent;
+						const element2 = filas[i].querySelectorAll("td")[0].textContent;
+						if (element.includes(element2)) {
+							posible = true;
+							break;
+						}
+					}
+					if (posible == false) {
+						DOTstring1 += filas[i].querySelectorAll("td")[0].textContent + " -> FIN;";
+					}
 				} else {
-					DOTstring1 += filas[i].querySelectorAll("td")[0].textContent + ";";
+					DOTstring1 += "INICIO ->" + filas[i].querySelectorAll("td")[0].textContent + ";";
 				}
 			}
 			DOTstring1 += "}";
@@ -288,7 +301,13 @@
 
 			var data = {
 				nodes: parsedData.nodes,
-				edges: parsedData.edges
+				edges: parsedData.edges,
+				layout: {
+					hierarchical: {
+						direction: "LR",
+						sortMethod: "directed"
+					}
+				}
 			}
 
 			var options = parsedData.options;
@@ -350,8 +369,7 @@
 					}
 
 				}
-			} else 
-			{
+			} else {
 				alert("Ingresa más actividades");
 			}
 		}
