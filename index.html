@@ -60,14 +60,22 @@
 		th {
 			border: 2px solid black;
 		}
-		h1{
+
+		h1 {
 			margin: 0;
 			padding: 0;
 		}
-		button{
+
+		button {
 			margin: 1em;
 		}
+
+		#cont {
+			width: 100%;
+			height: 500px;
+		}
 	</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
 </head>
 
 <body>
@@ -104,9 +112,13 @@
 			<tbody id="agregando">
 			</tbody>
 		</table>
+		<div id="cont"></div>
 		<button onclick="calcular()">CALCULAR HOLGURAS</button>
 	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
 	<script>
+		// provide data in the DOT language
+		//var DOTstring = 'dinetwork {1 -> 1 -> 2; 2 -> 3; 2 -- 4; 2 -> 1; 5 }';
 		var actual = 0;
 		function ingresar() {
 			var chr = String.fromCharCode(97 + actual).toUpperCase();
@@ -115,6 +127,7 @@
 			var select = document.getElementById("precedencia").value;
 			if (d != "" && du != "") {
 				var tr = document.createElement("tr");
+				tr.classList.add("filas");
 				var id = document.createElement("td");
 				id.id = chr;
 				var descrip = document.createElement("td");
@@ -138,7 +151,7 @@
 							if (inicio_te < inic) {
 								inicio_te = inic;
 							}
-							precs += (i==(spans.length-1))?che:che+"-";
+							precs += (i == (spans.length - 1)) ? che : che + "-";
 						}
 						var pre = document.getElementById("precedencia");
 						var ne = document.createElement("option");
@@ -149,7 +162,7 @@
 						descrip.textContent = d;
 						duracion.textContent = du;
 						ite.textContent = inicio_te;
-						fte.textContent = parseFloat(duracion.textContent)+parseFloat(inicio_te);
+						fte.textContent = parseFloat(duracion.textContent) + parseFloat(inicio_te);
 						ita.textContent = "-";
 						fta.textContent = "-";
 						hol.textContent = 0;
@@ -164,6 +177,7 @@
 						tr.appendChild(hol);
 						tr.appendChild(precedencias);
 						document.getElementById("agregando").appendChild(tr);
+						actualizarGrafo();
 					} else {
 						alert("Ingresa primero precedencias");
 						return;
@@ -193,6 +207,7 @@
 					tr.appendChild(hol);
 					tr.appendChild(precedencias);
 					document.getElementById("agregando").appendChild(tr);
+					actualizarGrafo();
 				}
 				document.getElementById("descripcion").value = "";
 				document.getElementById("duracion").value = "";
@@ -213,11 +228,47 @@
 			}
 		}
 
-		function calcular(){
+		function actualizarGrafo() {
+			var DOTstring = 'dinetwork {1 -> 1 -> 2; 2 -> 3; 2 -- 4; 2 -> 1; 5 }';
+			var filas = document.querySelectorAll(".filas");
+			var DOTstring1 = 'dinetwork {';
+			for (let i = 0; i < filas.length; i++){
+				var col_prec = filas[i].querySelectorAll("td")[8].textContent;
+				if (col_prec!="-"){
+					var precs = col_prec.split("-");
+					var temp = filas[i].querySelectorAll("td")[0].textContent;
+					for (let j = 0; j < precs.length; j++){
+						DOTstring1 += precs[j]+" -> "+temp+";";
+					}
+				} else {
+					DOTstring1 += filas[i].querySelectorAll("td")[0].textContent+";";
+				}
+			}
+			DOTstring1 += "}";
+			var parsedData = vis.network.convertDot(DOTstring1);
+
+			var data = {
+				nodes: parsedData.nodes,
+				edges: parsedData.edges
+			}
+
+			var options = parsedData.options;
+
+			// you can extend the options like a normal JSON variable:
+			options.nodes = {
+				color: 'red'
+			}
+
+			// create a network
+			var network = new vis.Network(document.getElementById("cont"), data, options);
+			var actual = 0;
+		}
+
+		function calcular() {
 			var tabla = document.getElementById("agregando");
 			var trs = tabla.querySelectorAll("tr");
-			for (let i = (trs.length-1); i >= 0; i--){
-				
+			for (let i = (trs.length - 1); i >= 0; i--) {
+
 			}
 		}
 
