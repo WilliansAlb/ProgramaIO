@@ -54,11 +54,15 @@
 		table {
 			border-collapse: collapse;
 			text-align: center;
+			table-layout: fixed;
+			width: 100%;
+			font-size: 0.7em;
 		}
 
 		td,
 		th {
 			border: 2px solid black;
+			word-wrap: break-word;
 		}
 
 		h1 {
@@ -74,6 +78,11 @@
 			width: 100%;
 			height: 500px;
 		}
+
+		input,
+		table {
+			width: 80%;
+		}
 	</style>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
 </head>
@@ -88,7 +97,7 @@
 		<input type="number" id="duracion" name="duracion">
 		<div id="precedencias">
 			<label for="precedencia">Ingresa que actividades se realizan antes a la actual</label>
-			<select name="precedencia" id="precedencia" onchange="cambiando(this)">
+			<select name="precedencia" id="precedencia" onchange="cambiando(this)" style="margin-left: 1em;">
 				<option value="-1">Sin precedencia</option>
 			</select>
 			<button style="display: none;" id="ingresar" onclick="ingresar_precedencia()">INGRESAR PRECEDENCIA</button>
@@ -148,7 +157,7 @@
 							var che = spans[i].textContent;
 							var tr1 = document.getElementById(che).parentNode;
 							var inic = tr1.querySelectorAll("td")[4].textContent;
-							if (inicio_te < inic) {
+							if (parseFloat(inicio_te) < parseFloat(inic)) {
 								inicio_te = inic;
 							}
 							precs += (i == (spans.length - 1)) ? che : che + "-";
@@ -232,16 +241,16 @@
 			var DOTstring = 'dinetwork {1 -> 1 -> 2; 2 -> 3; 2 -- 4; 2 -> 1; 5 }';
 			var filas = document.querySelectorAll(".filas");
 			var DOTstring1 = 'dinetwork {';
-			for (let i = 0; i < filas.length; i++){
+			for (let i = 0; i < filas.length; i++) {
 				var col_prec = filas[i].querySelectorAll("td")[8].textContent;
-				if (col_prec!="-"){
+				if (col_prec != "-") {
 					var precs = col_prec.split("-");
 					var temp = filas[i].querySelectorAll("td")[0].textContent;
-					for (let j = 0; j < precs.length; j++){
-						DOTstring1 += precs[j]+" -> "+temp+";";
+					for (let j = 0; j < precs.length; j++) {
+						DOTstring1 += precs[j] + " -> " + temp + ";";
 					}
 				} else {
-					DOTstring1 += filas[i].querySelectorAll("td")[0].textContent+";";
+					DOTstring1 += filas[i].querySelectorAll("td")[0].textContent + ";";
 				}
 			}
 			DOTstring1 += "}";
@@ -256,7 +265,8 @@
 
 			// you can extend the options like a normal JSON variable:
 			options.nodes = {
-				color: 'red'
+				color: 'black',
+				font: { size: 30, color: "white" }
 			}
 
 			// create a network
@@ -268,6 +278,45 @@
 			var tabla = document.getElementById("agregando");
 			var trs = tabla.querySelectorAll("tr");
 			for (let i = (trs.length - 1); i >= 0; i--) {
+				var tds = trs[i].querySelectorAll("td");
+				var id1 = tds[0].textContent;
+				var pasa = false;
+				console.log(tds[8].textContent);
+				if (tds[8].textContent != "-") {
+					for (let j = (trs.length - 1); j >= 0; j--) {
+						var tds2 = trs[j].querySelectorAll("td");
+						var id2 = tds2[8].textContent;
+						if (id2.includes(id1)) {
+							pasa = true;
+							break;
+						}
+					}
+					if (pasa == false) {
+						//3,4 -> 5,6
+						tds[5].textContent = tds[3].textContent;
+						tds[6].textContent = tds[4].textContent;
+					}
+					var spl = tds[8].textContent.split("-");
+					console.log(spl.length);
+					for (let o = 0; o < spl.length; o++) {
+						console.log("entra");
+						var docPadre = document.getElementById(spl[o]).parentNode;
+						var tdsEl = docPadre.querySelectorAll("td");
+						if (tdsEl[6].textContent == "-") {
+							tdsEl[6].textContent = tds[5].textContent;
+							tdsEl[5].textContent = parseFloat(tdsEl[6].textContent) - parseFloat(tdsEl[2].textContent);
+							tdsEl[7].textContent = parseFloat(tdsEl[5].textContent) - parseFloat(tdsEl[3].textContent);
+						} else {
+							if (parseFloat(tdsEl[6].textContent) > parseFloat(tds[5].textContent)) {
+								tdsEl[6].textContent = tds[5].textContent;
+								tdsEl[5].textContent = parseFloat(tdsEl[6].textContent) - parseFloat(tdsEl[2].textContent);
+								tdsEl[7].textContent = parseFloat(tdsEl[5].textContent) - parseFloat(tdsEl[3].textContent);
+							}
+						}
+					}
+				} else {
+					pasa = true;
+				}
 
 			}
 		}
