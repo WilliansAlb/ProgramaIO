@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
+		#contenido {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			align-content: center;
+			background-color: white;
+			width: 70%;
+			padding: 1em;
+			margin: auto;
+		}
+
+		* {
+			font-family: 'Oswald', sans-serif;
+		}
+
+		body {
+			background-image: url(https://www.criptonoticias.com/wp-content/uploads/2018/04/blockchain-base-datos-distribuida-descentralizada.jpeg);
+		}
+
+		#precedencias {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			align-content: center;
+		}
+
+		#listado_predecencias {
+			display: flex;
+			overflow: hidden;
+			flex-wrap: wrap;
+			flex-direction: row;
+			justify-content: center;
+		}
+
+		.precedencias {
+			margin: 1em;
+			padding: 1em;
+			background-color: black;
+			color: white;
+			border-radius: 0.5em;
+		}
+
+		table {
+			border-collapse: collapse;
+			text-align: center;
+		}
+
+		td,
+		th {
+			border: 2px solid black;
+		}
+		h1{
+			margin: 0;
+			padding: 0;
+		}
+		button{
+			margin: 1em;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="contenido">
+		<img src="http://chocolatedp.com/wp-content/uploads/2020/05/LogoTransparente.png" alt="Chocolate Doña Pancha">
+		<h1>Modelo de redes</h1>
+		<label for="descripcion">Ingresa la descripcion de la actividad</label>
+		<input type="text" id="descripcion" name="descripcion">
+		<label for="duracion">Ingresa la duración de la actividad</label>
+		<input type="number" id="duracion" name="duracion">
+		<div id="precedencias">
+			<label for="precedencia">Ingresa que actividades se realizan antes a la actual</label>
+			<select name="precedencia" id="precedencia" onchange="cambiando(this)">
+				<option value="-1">Sin precedencia</option>
+			</select>
+			<button style="display: none;" id="ingresar" onclick="ingresar_precedencia()">INGRESAR PRECEDENCIA</button>
+		</div>
+		<div id="listado_predecencias"></div>
+		<button onclick="ingresar()">INGRESAR ACTIVIDAD</button>
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>DESCRIPCION</th>
+					<th>DURACION</th>
+					<th>INICIO TEMPRANO</th>
+					<th>FINAL TEMPRANO</th>
+					<th>INICIO TARDIO</th>
+					<th>FINAL TARDIO</th>
+					<th>HOLGURA</th>
+					<th>PRECEDENCIAS</th>
+				</tr>
+			</thead>
+			<tbody id="agregando">
+			</tbody>
+		</table>
+		<button onclick="calcular()">CALCULAR HOLGURAS</button>
+	</div>
+	<script>
+		var actual = 0;
+		function ingresar() {
+			var chr = String.fromCharCode(97 + actual).toUpperCase();
+			var d = document.getElementById("descripcion").value;
+			var du = document.getElementById("duracion").value;
+			var select = document.getElementById("precedencia").value;
+			if (d != "" && du != "") {
+				var tr = document.createElement("tr");
+				var id = document.createElement("td");
+				id.id = chr;
+				var descrip = document.createElement("td");
+				var duracion = document.createElement("td");
+				var ite = document.createElement("td");
+				var fte = document.createElement("td");
+				var ita = document.createElement("td");
+				var fta = document.createElement("td");
+				var hol = document.createElement("td");
+				var precedencias = document.createElement("td");
+
+				if (select != -1) {
+					var spans = document.querySelectorAll(".precedencias");
+					if (spans.length > 0) {
+						var inicio_te = 0;
+						var precs = "";
+						for (let i = 0; i < spans.length; i++) {
+							var che = spans[i].textContent;
+							var tr1 = document.getElementById(che).parentNode;
+							var inic = tr1.querySelectorAll("td")[4].textContent;
+							if (inicio_te < inic) {
+								inicio_te = inic;
+							}
+							precs += (i==(spans.length-1))?che:che+"-";
+						}
+						var pre = document.getElementById("precedencia");
+						var ne = document.createElement("option");
+						ne.value = chr;
+						ne.textContent = chr;
+						pre.appendChild(ne);
+						id.textContent = ne.value;
+						descrip.textContent = d;
+						duracion.textContent = du;
+						ite.textContent = inicio_te;
+						fte.textContent = parseFloat(duracion.textContent)+parseFloat(inicio_te);
+						ita.textContent = "-";
+						fta.textContent = "-";
+						hol.textContent = 0;
+						precedencias.textContent = precs;
+						tr.appendChild(id);
+						tr.appendChild(descrip);
+						tr.appendChild(duracion);
+						tr.appendChild(ite);
+						tr.appendChild(fte);
+						tr.appendChild(ita);
+						tr.appendChild(fta);
+						tr.appendChild(hol);
+						tr.appendChild(precedencias);
+						document.getElementById("agregando").appendChild(tr);
+					} else {
+						alert("Ingresa primero precedencias");
+						return;
+					}
+				} else {
+					var pre = document.getElementById("precedencia");
+					var ne = document.createElement("option");
+					ne.value = chr;
+					ne.textContent = chr;
+					pre.appendChild(ne);
+					id.textContent = ne.value;
+					descrip.textContent = d;
+					duracion.textContent = du;
+					ite.textContent = 0;
+					fte.textContent = duracion.textContent;
+					ita.textContent = "-";
+					fta.textContent = "-";
+					hol.textContent = 0;
+					precedencias.textContent = "-";
+					tr.appendChild(id);
+					tr.appendChild(descrip);
+					tr.appendChild(duracion);
+					tr.appendChild(ite);
+					tr.appendChild(fte);
+					tr.appendChild(ita);
+					tr.appendChild(fta);
+					tr.appendChild(hol);
+					tr.appendChild(precedencias);
+					document.getElementById("agregando").appendChild(tr);
+				}
+				document.getElementById("descripcion").value = "";
+				document.getElementById("duracion").value = "";
+				document.getElementById("listado_predecencias").innerHTML = "";
+				actual++;
+			} else {
+				alert("Tienes que colocar descripcion y duracion de la actividad");
+			}
+		}
+
+		function cambiando(select) {
+			if (select.value != "-1") {
+				document.getElementById("listado_predecencias").style.display = "flex";
+				document.getElementById("ingresar").style.display = "block";
+			} else {
+				document.getElementById("listado_predecencias").style.display = "none";
+				document.getElementById("ingresar").style.display = "none";
+			}
+		}
+
+		function calcular(){
+			var tabla = document.getElementById("agregando");
+			var trs = tabla.querySelectorAll("tr");
+			for (let i = (trs.length-1); i >= 0; i--){
+				
+			}
+		}
+
+		function ingresar_precedencia() {
+			var valor = document.getElementById("precedencia").value;
+			var span = document.createElement("span");
+			span.textContent = valor;
+			span.classList.add("precedencias");
+			var spans = document.querySelectorAll(".precedencias");
+			for (let i = 0; i < spans.length; i++) {
+				if (spans[i].textContent === valor) {
+					alert("Ingresa una precedencia diferente");
+					return;
+				}
+			}
+			document.getElementById("listado_predecencias").appendChild(span);
+		}
+	</script>
+</body>
+
+</html>
