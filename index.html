@@ -25,6 +25,7 @@
 		}
 
 		body {
+			margin: 0;
 			background-image: url(https://www.criptonoticias.com/wp-content/uploads/2018/04/blockchain-base-datos-distribuida-descentralizada.jpeg);
 		}
 
@@ -83,11 +84,33 @@
 		table {
 			width: 80%;
 		}
+
+		#oculto {
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			z-index: 100;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			align-content: center;
+			background-color: rgba(0, 0, 0, 0.705);
+		}
+
+		#ver {
+			float: left;
+			position: fixed;
+		}
 	</style>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
 </head>
 
 <body>
+	<button id="ver" onclick="document.getElementById('oculto').style.display = 'flex';">VER MODELO DEL GRUPO</button>
+	<div id="oculto" style="display: none;">
+		<img src="modelo.png" alt="Modelo creado por el grupo" width="40%">
+		<button onclick="this.parentNode.style.display = 'none';">OCULTAR</button>
+	</div>
 	<div id="contenido">
 		<img src="http://chocolatedp.com/wp-content/uploads/2020/05/LogoTransparente.png" alt="Chocolate Doña Pancha">
 		<h1>Modelo de redes</h1>
@@ -121,8 +144,11 @@
 			<tbody id="agregando">
 			</tbody>
 		</table>
-		<div id="cont"></div>
-		<button onclick="calcular()">CALCULAR HOLGURAS</button>
+		<div id="arriba" style="display: none; flex-direction: column; align-content: center;align-items: center;">
+			<h2>Diagrama de rutas</h2>
+			<div id="cont"></div>
+		</div>
+		<button onclick="calcular()" id="btn_calculo" style="display: none;">CALCULAR HOLGURAS</button>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
 	<script>
@@ -186,6 +212,8 @@
 						tr.appendChild(hol);
 						tr.appendChild(precedencias);
 						document.getElementById("agregando").appendChild(tr);
+						document.getElementById("arriba").style.display = "flex";
+						document.getElementById("btn_calculo").style.display = "block";
 						actualizarGrafo();
 					} else {
 						alert("Ingresa primero precedencias");
@@ -216,6 +244,8 @@
 					tr.appendChild(hol);
 					tr.appendChild(precedencias);
 					document.getElementById("agregando").appendChild(tr);
+					document.getElementById("arriba").style.display = "flex";
+					document.getElementById("btn_calculo").style.display = "block";
 					actualizarGrafo();
 				}
 				document.getElementById("descripcion").value = "";
@@ -277,47 +307,52 @@
 		function calcular() {
 			var tabla = document.getElementById("agregando");
 			var trs = tabla.querySelectorAll("tr");
-			for (let i = (trs.length - 1); i >= 0; i--) {
-				var tds = trs[i].querySelectorAll("td");
-				var id1 = tds[0].textContent;
-				var pasa = false;
-				console.log(tds[8].textContent);
-				if (tds[8].textContent != "-") {
-					for (let j = (trs.length - 1); j >= 0; j--) {
-						var tds2 = trs[j].querySelectorAll("td");
-						var id2 = tds2[8].textContent;
-						if (id2.includes(id1)) {
-							pasa = true;
-							break;
+			if (trs.length > 1) {
+				for (let i = (trs.length - 1); i >= 0; i--) {
+					var tds = trs[i].querySelectorAll("td");
+					var id1 = tds[0].textContent;
+					var pasa = false;
+					console.log(tds[8].textContent);
+					if (tds[8].textContent != "-") {
+						for (let j = (trs.length - 1); j >= 0; j--) {
+							var tds2 = trs[j].querySelectorAll("td");
+							var id2 = tds2[8].textContent;
+							if (id2.includes(id1)) {
+								pasa = true;
+								break;
+							}
 						}
-					}
-					if (pasa == false) {
-						//3,4 -> 5,6
-						tds[5].textContent = tds[3].textContent;
-						tds[6].textContent = tds[4].textContent;
-					}
-					var spl = tds[8].textContent.split("-");
-					console.log(spl.length);
-					for (let o = 0; o < spl.length; o++) {
-						console.log("entra");
-						var docPadre = document.getElementById(spl[o]).parentNode;
-						var tdsEl = docPadre.querySelectorAll("td");
-						if (tdsEl[6].textContent == "-") {
-							tdsEl[6].textContent = tds[5].textContent;
-							tdsEl[5].textContent = parseFloat(tdsEl[6].textContent) - parseFloat(tdsEl[2].textContent);
-							tdsEl[7].textContent = parseFloat(tdsEl[5].textContent) - parseFloat(tdsEl[3].textContent);
-						} else {
-							if (parseFloat(tdsEl[6].textContent) > parseFloat(tds[5].textContent)) {
+						if (pasa == false) {
+							//3,4 -> 5,6
+							tds[5].textContent = tds[3].textContent;
+							tds[6].textContent = tds[4].textContent;
+						}
+						var spl = tds[8].textContent.split("-");
+						console.log(spl.length);
+						for (let o = 0; o < spl.length; o++) {
+							console.log("entra");
+							var docPadre = document.getElementById(spl[o]).parentNode;
+							var tdsEl = docPadre.querySelectorAll("td");
+							if (tdsEl[6].textContent == "-") {
 								tdsEl[6].textContent = tds[5].textContent;
 								tdsEl[5].textContent = parseFloat(tdsEl[6].textContent) - parseFloat(tdsEl[2].textContent);
 								tdsEl[7].textContent = parseFloat(tdsEl[5].textContent) - parseFloat(tdsEl[3].textContent);
+							} else {
+								if (parseFloat(tdsEl[6].textContent) > parseFloat(tds[5].textContent)) {
+									tdsEl[6].textContent = tds[5].textContent;
+									tdsEl[5].textContent = parseFloat(tdsEl[6].textContent) - parseFloat(tdsEl[2].textContent);
+									tdsEl[7].textContent = parseFloat(tdsEl[5].textContent) - parseFloat(tdsEl[3].textContent);
+								}
 							}
 						}
+					} else {
+						pasa = true;
 					}
-				} else {
-					pasa = true;
-				}
 
+				}
+			} else 
+			{
+				alert("Ingresa más actividades");
 			}
 		}
 
